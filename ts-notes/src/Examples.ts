@@ -1,3 +1,7 @@
+/*
+General code examples supporting my blog post
+*/
+
 
 type Person = {firstNm: string, lastNm: string} | null
 
