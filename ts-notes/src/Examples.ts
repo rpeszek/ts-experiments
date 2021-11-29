@@ -1,3 +1,5 @@
+import {_} from './Util'
+
 /*
 General code examples supporting my blog post
 */
@@ -11,7 +13,7 @@ const getName = (p:Person): string => {
         //const tst2 = p.firstNm //will not compile
         return "John Smith"
     } else {
-        return p.firstNm + " " + p.lastNm //compiles
+        return p.firstNm + " " + p.firstNm //compiles
     }
 }
 
@@ -23,7 +25,9 @@ type Either<A,B> =
 let x: Either<number, string> = {type: "left", content: 1}
 //let wrong: Either<number, string> = {type: "left", content: "one"} // will not compile
 
-let y: Either<number, string> = {"type": "left", "content": 1}
+const x1: Either<number, string> = {type: "left", content: _()}
+
+const y: Either<number, string> = {"type": "left", "content": 1}
 //let wrong: Either<number, string> = {"type": "left", "content": "one"} // will not compile
 
 type JsonVal = 
@@ -39,6 +43,7 @@ const tstj : JsonVal = {type:"array", val:[{type: "null"}, {type: "number", val:
 //const wrong : JsonVal = {type:"array", val:[{type: "number", val: {type: "string", val: "5"}}]} //does not compile, number cannot a nested string
 //const wrong2 : {type: "object",  val:[{type: "null"}, {type: "number", val: 5}]} //does not compile, object is not an array
 
+const str = "Hello " + _()
 
 export const contrived = (n: 1 | 2) : number => {
     if(n === 1) {
