@@ -100,3 +100,35 @@ const generalHead = <T> (t: T) : Flatten<T> => {
         // return t //Type 'T' is not assignable to type 'Flatten<T>'
         return t as any
 }
+
+
+//_any_ is crazy
+
+const sadAny : any = "emptyness and sadness"
+const sadVoid : void = sadAny
+const sadUndefined : undefined = sadAny
+
+const myCallback = (n: number):void => {
+    return sadVoid;
+}
+
+
+const someBool = (): boolean => true
+
+_() ? "foo" : "bar"           //1
+someBool() ? "foo" : _()      //2
+someBool() ? _() : "bar"      //3  
+
+const whoAmI = someBool() ? "foo" : 2
+
+someBool() ? ("foo" as string) : _() //4   
+
+const s : string = someBool() ? ("foo" as string) : _() //5
+
+1 === _()
+1 == _()
+
+1 == ("boo" as unknown)
+
+1 == (2 as unknown)
+
