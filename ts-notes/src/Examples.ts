@@ -132,3 +132,4 @@ const s : string = someBool() ? ("foo" as string) : _() //5
 
 1 == (2 as unknown)
 
+1 == (<unknown> 2)
