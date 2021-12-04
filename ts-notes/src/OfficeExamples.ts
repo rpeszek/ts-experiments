@@ -15,7 +15,7 @@ export const officePromise = <T> (getasync: ((fx: ((r: Office.AsyncResult<T>) =>
 
 export type OfficeCallack<T> = (x: Office.AsyncResult<T>) => void
 
-export const example1 = async (item: Office.MessageRead) : Promise<string> => {  
+export const example1 = async (item: Office.MessageRead): Promise<string> => {  
     const bodyType = Office.CoercionType.Html
     
     const partiallyAppliedBodyFn = (fn: ((res: Office.AsyncResult<string>) => void)) => 
@@ -29,23 +29,25 @@ export const example1 = async (item: Office.MessageRead) : Promise<string> => {
 }
 
 
+// --- Happy path
 
-
-export const example2 = async (item: Office.MessageRead) : Promise<string> => 
+const example2 = async (item: Office.MessageRead): Promise<string> => 
    await officePromise (curry(item.body.getAsync)(Office.CoercionType.Html)) 
 
 
-const willNotCompile = async (item: Office.MessageRead) : Promise<string> => {
-    const emptyConfig : Office.AsyncContextOptions = {}
+
+// Bumps on path
+
+const willNotCompile = async (item: Office.MessageRead): Promise<string> => {
+    const emptyConfig: Office.AsyncContextOptions = {}
     //const body3  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
     return "no luck"
 }   
 
 
 
-
-const whyWhyWhy = async (item: Office.MessageRead) : Promise<unknown> => {
-    const emptyConfig : any = {}
+const whyWhyWhy = async (item: Office.MessageRead): Promise<unknown> => {
+    const emptyConfig: any = {}
     const body3  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
     
     //hover over _() to see the type
@@ -53,8 +55,11 @@ const whyWhyWhy = async (item: Office.MessageRead) : Promise<unknown> => {
     return body3
 }   
 
-const typeApplied = async (item: Office.MessageRead) : Promise<string> => {
-    const emptyConfig : Office.AsyncContextOptions = {}
+
+// --- Leveling Bumps
+
+const typeApplied = async (item: Office.MessageRead): Promise<string> => {
+    const emptyConfig: Office.AsyncContextOptions = {}
     const body3  = await officePromise<string> (
       curry3<Office.CoercionType, Office.AsyncContextOptions, OfficeCallack<string>, void> 
         (item.body.getAsync)
@@ -73,16 +78,16 @@ const typeApplied = async (item: Office.MessageRead) : Promise<string> => {
 }
 
 
-//Bloopers:
+// --- Type Checking Bloopers
 
-const bloopers = async (item: Office.MessageRead) : Promise<void> => {
-    const good : (a: Office.CoercionType) 
+const bloopers = async (item: Office.MessageRead): Promise<void> => {
+    const good: (a: Office.CoercionType) 
             => (b: ((asyncResult: Office.AsyncResult<string>) => void)) 
             => void
         = curry (item.body.getAsync)
 
     //compiles but it should not, compiles even with type anotation
-    const nonsense1 : (a: Office.CoercionType) 
+    const nonsense1: (a: Office.CoercionType) 
             => (b: ((asyncResult: Office.AsyncResult<string>) => void)) 
             => void
         = curry (curry (item.body.getAsync)) 
