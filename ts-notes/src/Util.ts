@@ -6,6 +6,9 @@ export const _ = <T>(): T => {
     throw new Error("hole"); 
 }
 
+// export const _never = (): never => {
+//     throw new Error("hole"); 
+// }
 
 export const curry = <T1, T2, R> (fn: (ax: T1, bx: T2) => R): (a: T1) => (b: T2) => R => {
     const res = (a: T1) => (b: T2) => fn(a, b)
@@ -13,6 +16,7 @@ export const curry = <T1, T2, R> (fn: (ax: T1, bx: T2) => R): (a: T1) => (b: T2)
  }
 
 const addtst = (a:number, b: number):number => a + b
+const curriedAdd = curry(addtst) //const curriedAdd: (a: number) => (b: number) => numbers
 const tst = curry(addtst)(1) //const tst: (b: number) => number
 const tstb = curry(addtst)(1)(2) //tst2:number = 3
 //const willnotcompile = curry(_())
@@ -25,3 +29,14 @@ export const curry3 = <T1, T2, T3, R> (fn: (ax: T1, bx: T2, cx: T3) => R): (a: T
     const res = (a: T1) => (b: T2) => (c: T3) => fn(a, b, c)
     return res
  }
+
+export const officePromise = <T> (getasync: ((fx: ((r: Office.AsyncResult<T>) => void)) => void)): Promise<T> => {
+    return new Promise((resolve, reject) => {
+      getasync((res: Office.AsyncResult<T>) => {
+        if(res.status===Office.AsyncResultStatus.Succeeded){
+          resolve(res.value)
+      } else
+          reject(res.error)
+      })
+   })
+  }

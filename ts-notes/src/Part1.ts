@@ -1,18 +1,52 @@
+import {_, curry, curry3, officePromise} from './Util'
 
-import {_, curry, curry3} from './Util'
+/*
+General code examples supporting my blog post
+*/
 
-export const officePromise = <T> (getasync: ((fx: ((r: Office.AsyncResult<T>) => void)) => void)): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      getasync((res: Office.AsyncResult<T>) => {
-        if(res.status===Office.AsyncResultStatus.Succeeded){
-          resolve(res.value)
-      } else
-          reject(res.error)
-      })
-   })
-  }
+// ---- Introduction 
 
 
+type Person = {firstNm: string, lastNm: string} | null
+
+const getName = (p:Person): string => {
+    //const tst1 = p.firstNm //will not compile
+    if(p===null){
+        //const tst2 = p.firstNm //will not compile
+        return "John Smith"
+    } else {
+        return p.firstNm + " " + p.firstNm //compiles
+    }
+}
+
+
+export type Either<A,B> = 
+| {type: "left", content: A}
+| {type: "right", content: B}
+
+let x: Either<number, string> = {type: "left", content: 1}
+//let wrong: Either<number, string> = {type: "left", content: "one"} // will not compile
+
+const x1: Either<number, string> = {type: "left", content: _()}
+
+const y: Either<number, string> = {"type": "left", "content": 1}
+//let wrong: Either<number, string> = {"type": "left", "content": "one"} // will not compile
+
+type JsonVal = 
+| {type: "object", val: Map<string, JsonVal>}
+| {type: "array", val: JsonVal[]}
+| {type: "string", val: string}
+| {type: "number", val: number}
+| {type: "bool", val: boolean}
+| {type: "null"}
+
+
+const tstj: JsonVal = {type:"array", val:[{type: "null"}, {type: "number", val: 5}]} //compiles
+//const wrong: JsonVal = {type:"array", val:[{type: "number", val: {type: "string", val: "5"}}]} //does not compile, number cannot a nested string
+//const wrong2: {type: "object",  val:[{type: "null"}, {type: "number", val: 5}]} //does not compile, object is not an array
+
+
+//office.js
 export type OfficeCallack<T> = (x: Office.AsyncResult<T>) => void
 
 export const example1 = async (item: Office.MessageRead): Promise<string> => {  
@@ -23,17 +57,11 @@ export const example1 = async (item: Office.MessageRead): Promise<string> => {
     
     //more readable version:
     const partiallyAppliedBodyFn2 = (fn: OfficeCallack<string>) => item.body.getAsync(Office.CoercionType.Html, fn)
-    
+    const partiallyAppliedBodyFn3: (_: OfficeCallack<string>) => void = 
+       fn => item.body.getAsync(Office.CoercionType.Html, fn)
     const body = await officePromise<string> (partiallyAppliedBodyFn) // body: string
     return body
 }
-
-
-// --- Happy path
-
-const example2 = async (item: Office.MessageRead): Promise<string> => 
-   await officePromise (curry(item.body.getAsync)(Office.CoercionType.Html)) 
-
 
 
 // Bumps on path
@@ -45,15 +73,24 @@ const willNotCompile = async (item: Office.MessageRead): Promise<string> => {
 }   
 
 
-
 const whyWhyWhy = async (item: Office.MessageRead): Promise<unknown> => {
     const emptyConfig: any = {}
     const body3  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
     
-    //hover over _() to see the type
+    //hover over _() to see the type, IntelliSense shows completely wrong type
     const body3b  = await officePromise (curry3 (item.body.getAsync)(Office.CoercionType.Html)(_())) 
     return body3
-}   
+}  
+
+const body3 = officePromise (curry3(({} as Office.MessageRead).body.getAsync)(Office.CoercionType.Html)({} as any)) 
+type WhatIsBody3 = typeof body3 //Promise<unknown>
+
+
+// --- Happy path
+
+const example2 = async (item: Office.MessageRead): Promise<string> => 
+   await officePromise (curry(item.body.getAsync)(Office.CoercionType.Html)) 
+
 
 
 // --- Leveling Bumps
@@ -76,6 +113,11 @@ const typeApplied = async (item: Office.MessageRead): Promise<string> => {
       )  
    return body3
 }
+
+// --- Leveling Bumps - type holes
+const str = "Hello " + _()
+//const test = curry(_()) //compilation error 
+const test = curry({} as any)
 
 
 // --- Type Checking Bloopers
@@ -100,3 +142,6 @@ const bloopers = async (item: Office.MessageRead): Promise<void> => {
     const nonsense4 = curry(curry(curry))
 }
 
+const nonsense2 = curry(curry)
+
+type WhatTheHeck = typeof nonsense2
