@@ -42,7 +42,7 @@ type JsonVal =
 
 
 const tstj: JsonVal = {type:"array", val:[{type: "null"}, {type: "number", val: 5}]} //compiles
-//const wrong: JsonVal = {type:"array", val:[{type: "number", val: {type: "string", val: "5"}}]} //does not compile, number cannot a nested string
+const wrong: JsonVal = {type: "number", val: {type: "string", val: "5"}} //does not compile, number cannot a nested string
 //const wrong2: {type: "object",  val:[{type: "null"}, {type: "number", val: 5}]} //does not compile, object is not an array
 
 
@@ -75,11 +75,13 @@ const willNotCompile = async (item: Office.MessageRead): Promise<string> => {
 
 const whyWhyWhy = async (item: Office.MessageRead): Promise<unknown> => {
     const emptyConfig: any = {}
-    const body3  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
+    //body4 has 'unknown' type,  officePromise<string> would make it a string but there is enough of info
+    //in item.body.getAsync to infer it
+    const body4  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
     
     //hover over _() to see the type, IntelliSense shows completely wrong type
     const body3b  = await officePromise (curry3 (item.body.getAsync)(Office.CoercionType.Html)(_())) 
-    return body3
+    return body4
 }  
 
 const body3 = officePromise (curry3(({} as Office.MessageRead).body.getAsync)(Office.CoercionType.Html)({} as any)) 
@@ -116,7 +118,7 @@ const typeApplied = async (item: Office.MessageRead): Promise<string> => {
 
 // --- Leveling Bumps - type holes
 const str = "Hello " + _()
-//const test = curry(_()) //compilation error 
+const testaa = curry(_()) //compilation error 
 const test = curry({} as any)
 
 
