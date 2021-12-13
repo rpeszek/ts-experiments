@@ -16,3 +16,4 @@ const sadUndefined: undefined = sadAny
 const myCallback = (n: number):void => {
     return sadVoid;
 }
+

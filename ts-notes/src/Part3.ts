@@ -55,3 +55,9 @@ const s: string = someBool() ? _(): _() //4
 1 == (2 as unknown)
 
 1 == (<unknown> 2)
+
+
+const saferJSON = (s:string) : unknown => 
+   JSON.parse(s)
+
+1 === saferJSON ('"boo"') 

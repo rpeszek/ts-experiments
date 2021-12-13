@@ -79,6 +79,10 @@ const whyWhyWhy = async (item: Office.MessageRead): Promise<unknown> => {
     //in item.body.getAsync to infer it
     const body4  = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(emptyConfig)) 
     
+    //the same is true for body4b
+    const crazyConfig : (_: Office.AsyncResult<string>) => void = x => ""
+    const body4b = await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(crazyConfig)) 
+
     //hover over _() to see the type, IntelliSense shows completely wrong type
     const body3b  = await officePromise (curry3 (item.body.getAsync)(Office.CoercionType.Html)(_())) 
     return body4
