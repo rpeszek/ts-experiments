@@ -63,7 +63,38 @@ type SameAs<A> = Either<never,A>
 const onlyA: SameAs<number> = {type: "right", content:_()}
 const impossible: SameAs<number> = {type: "left", content:_()}
 
+// --- undefined callbacks
+
+const res = _() === _()
+declare function eqeqeq(a: unknown, b: unknown): boolean
+eqeqeq("some email body", 1) //compiles
+
+declare function someUnknownCallback(t: unknown): void 
+const overbar: <T>(_:T) => void =  someUnknownCallback
+
+declare function someOverbar<T>(t:T): void
+const unknownCallback: (_: unknown) => void = someOverbar
+
+const overbar2: <T>(_:T) => void = t => {}
+const unknownCallback2: (_: unknown) => void = t => {}
+
+overbar(_() === _())
+overbar("" + _())
+
+
+const overbar3: <T>(_:T) => void =  _()
+//export const underbar: <T>() => T = someOverbar //this obviously does not compile
+
+// declare function unk<R>(t: unknown): R 
+// const top = <T,R>(t:T): R => unk(t)
+
+// declare function top2<T,R>(t:T): R
+// const unk2 = <R>(t: unknown): R => top(t)
+
+
+
 // --- higher rank
+
 interface HoleInterface {
     <T>(): T;
   }
@@ -136,4 +167,17 @@ const generalHead = <T> (t: T): Flatten<T> => {
 }
 
 
+//-- never vs type hole
 
+export const _never = (): never => {
+    throw new Error("hole"); 
+}
+
+export const _hole = <T>(): T =>  _never() 
+
+
+export const __hole = <T>(): T => {
+    throw new Error("hole"); 
+}
+
+export const __never = (): never => __hole()

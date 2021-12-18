@@ -7,15 +7,17 @@ General code examples supporting my blog post
 // ---- Introduction 
 
 
-type Person = {firstNm: string, lastNm: string} | null
+export type Person = {firstNm: string, lastNm: string} 
 
-const getName = (p:Person): string => {
+export type NullablePerson = Person | null
+
+const getName = (p:NullablePerson): string => {
     //const tst1 = p.firstNm //will not compile
     if(p===null){
         //const tst2 = p.firstNm //will not compile
         return "John Smith"
     } else {
-        return p.firstNm + " " + p.firstNm //compiles
+        return p.firstNm + " " + p.lastNm //compiles
     }
 }
 

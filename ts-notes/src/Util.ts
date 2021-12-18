@@ -6,9 +6,6 @@ export const _ = <T>(): T => {
     throw new Error("hole"); 
 }
 
-// export const _never = (): never => {
-//     throw new Error("hole"); 
-// }
 
 export const curry = <T1, T2, R> (fn: (ax: T1, bx: T2) => R): (a: T1) => (b: T2) => R => {
     const res = (a: T1) => (b: T2) => fn(a, b)
