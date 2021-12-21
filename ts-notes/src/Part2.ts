@@ -47,6 +47,14 @@ if (isPerson(possiblyPerson)) {
 ("some email body" as unknown) === 1
 
 
+const res = _() === _()
+(1 as 1) === _()
+_() === (1 as 1)
+
+declare function eqeqeq(a: unknown, b: unknown): boolean
+eqeqeq("some email body", 1) //compiles
+
+
 JSON.stringify(_())
 
 

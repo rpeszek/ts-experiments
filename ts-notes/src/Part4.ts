@@ -65,9 +65,7 @@ const impossible: SameAs<number> = {type: "left", content:_()}
 
 // --- undefined callbacks
 
-const res = _() === _()
-declare function eqeqeq(a: unknown, b: unknown): boolean
-eqeqeq("some email body", 1) //compiles
+
 
 declare function someUnknownCallback(t: unknown): void 
 const overbar: <T>(_:T) => void =  someUnknownCallback
