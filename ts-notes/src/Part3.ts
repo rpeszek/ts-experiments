@@ -169,6 +169,17 @@ unify(1 as 1, 2 as 2)
 unify(1 as 1, null)
 // unify(1 as 1, "boo")
 
+
+
+const booone : 1 | "boo" = "boo"
+const oneboo : 1 | "boo" = 1
+
+//Argument of type '1' is not assignable to parameter of type '"boo"'.ts(2345)
+//eq(booone, oneboo) //still does not compile!
+eq<(1 | "boo")>(booone, oneboo)
+
+
+
 const hello = {hello: "there"}
 //unify (1, hello)
 
@@ -177,6 +188,7 @@ verifyExtends<1, 1 | 2>()
 
 verifyExtends<1, 1 | "boo">()
 verifyExtends<"boo", 1 | "boo">()
-//
-//const x : number & string = ""
 
+
+//Object is of type 'unknown'
+//const x = _() + 1;

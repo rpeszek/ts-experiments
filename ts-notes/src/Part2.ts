@@ -44,17 +44,18 @@ if (isPerson(possiblyPerson)) {
     // console.log(possiblyPerson.firstNm) //does not compile
 }
 
+
 ("some email body" as unknown) === 1
 
 
-const res = _() === _()
+const res = _() === _();
 (1 as 1) === _()
 _() === (1 as 1)
 
 declare function eqeqeq(a: unknown, b: unknown): boolean
 eqeqeq("some email body", 1) //compiles
 
-
+//this one is 'any' based
 JSON.stringify(_())
 
 
