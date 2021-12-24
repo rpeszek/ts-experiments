@@ -126,28 +126,71 @@ const valid = secretive(goodProgram) //valid: string[]
 const invalid = secretive(stealPassword) //invalid: unknown, unfortunately compiles retrieving password as unknown
 
 
+// interface attempt also allows type escape
+interface ExistentialCallback<R> {
+    <T>(t: T): R;
+  }
 
 
+const secretive2 = <R> (fn: ExistentialCallback<R>): R  => {
+    const s : any = "topsecret"
+    return fn (s)
+ }
 
-// --- Phanotom types do not work
+const stealPassword2 : ExistentialCallback<unknown> = stealPassword
 
-type Person<T> = {firstNm: string, lastNm: string}
+secretive2(stealPassword2)
 
+
+ 
+
+// --- Straighforward Phanotom types do not work
+// People use classes / interfaces to accomplish similar things
+// see also https://github.com/microsoft/TypeScript/issues/21625
+
+type Person0<T> = {firstNm: string, lastNm: string}  //adding value level representation t: T as a filed would fix this
+
+const testP0 : <T>(fst: string, lst: string) => Person0<T> = (fst, lst) => {
+    return {firstNm: fst, lastNm: lst}
+} 
 
 type NotValidated = {type: "notvalidated"}
 type Validated = {type: "validated"}
 
-declare function validate(p: Person<NotValidated>):  Person<Validated> 
+declare function validate0(p: Person0<NotValidated>):  Person0<Validated> 
 
-declare function doSomethingValidated(p: Person<Validated>): void
+declare function doSomethingValidated0(p: Person0<Validated>): void
 
-function validatedOrNot<T>(p:Person<T>): void{
-    doSomethingValidated(p)
+function validatedOrNot0<T>(p:Person0<T>): void{
+    doSomethingValidated0(p)
 }
 
-function notValidated (p:Person<NotValidated>): void{
-    doSomethingValidated(p)
+function notValidated0 (p:Person0<NotValidated>): void{
+    doSomethingValidated0(p)
 }
+
+// Phantom apptempt that works:
+
+type Person1<T> = {firstNm: string, lastNm: string, t?: T}  //adding value level representation t: T as a filed would fix this
+
+const testP1 : <T>(fst: string, lst: string) => Person1<T> = (fst, lst) => {
+    return {firstNm: fst, lastNm: lst}
+} 
+
+declare function validate1(p: Person1<NotValidated>):  Person1<Validated> 
+
+declare function doSomethingValidated1(p: Person1<Validated>): void
+
+// NO loger compile!
+
+// function validatedOrNot1<T>(p:Person1<T>): void{
+//     doSomethingValidated1(p)
+// }
+
+// function notValidated1 (p:Person1<NotValidated>): void{
+//     doSomethingValidated1(p)
+// }
+
 
 
 //-- never vs type hole
