@@ -1,6 +1,8 @@
 
 # ts-notes
 
+This project provides code examples that support my 
+[Type Enthusiast's Notes about TypeScript Series](https://rpeszek.github.io/posts/2021-12-12-ts-types-part1.html)
 
 
 ## Running Tests / setup

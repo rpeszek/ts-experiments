@@ -5,7 +5,6 @@ import {Either} from './Part1'
 
 
 
-
 // --- Subtyping 
 
 function verifyExtends<T1, T2 extends T1>() {}
@@ -53,42 +52,30 @@ const whatIsThat = amIFooOrBar({foo: "foo", bar: "bar"})
 
 
 
-// ---- `never` note
+// --- Type Level programming
 
-const nevr : never = _()
+type HasContent<C> = {content: C}
 
+type GetContent<T> = T extends HasContent <infer C> ? C: T
 
-type SameAs<A> = Either<never,A>
+const getContent = <C, T extends HasContent<C>> (t: T): GetContent<T> => {
+   //return t.content //compiler error:  Type 'C' is not assignable to type 'GetContent<T>'
+   return t.content as any
+}
 
-const onlyA: SameAs<number> = {type: "right", content:_()}
-const impossible: SameAs<number> = {type: "left", content:_()}
+type Flatten<Type> = Type extends Array<infer Item> ? Item: Type;
 
-// --- undefined callbacks
+const head = <T> (t: T[]): Flatten<T[]> => {
+    return t[0]
+}
 
-
-
-declare function someUnknownCallback(t: unknown): void 
-const overbar: <T>(_:T) => void =  someUnknownCallback
-
-declare function someOverbar<T>(t:T): void
-const unknownCallback: (_: unknown) => void = someOverbar
-
-const overbar2: <T>(_:T) => void = t => {}
-const unknownCallback2: (_: unknown) => void = t => {}
-
-overbar(_() === _())
-overbar("" + _())
-
-
-const overbar3: <T>(_:T) => void =  _()
-//export const underbar: <T>() => T = someOverbar //this obviously does not compile
-
-// declare function unk<R>(t: unknown): R 
-// const top = <T,R>(t:T): R => unk(t)
-
-// declare function top2<T,R>(t:T): R
-// const unk2 = <R>(t: unknown): R => top(t)
-
+const generalHead = <T> (t: T): Flatten<T> => {
+    if(Array.isArray(t)) 
+        return t[0]
+    else 
+        // return t //Type 'T' is not assignable to type 'Flatten<T>'
+        return t as any
+}
 
 
 // --- higher rank
@@ -139,29 +126,27 @@ const valid = secretive(goodProgram) //valid: string[]
 const invalid = secretive(stealPassword) //invalid: unknown, unfortunately compiles retrieving password as unknown
 
 
-// --- Type Level programming
 
-type HasContent<C> = {content: C}
 
-type GetContent<T> = T extends HasContent <infer C> ? C: T
 
-const getContent = <C, T extends HasContent<C>> (t: T): GetContent<T> => {
-   //return t.content //compiler error:  Type 'C' is not assignable to type 'GetContent<T>'
-   return t.content as any
+// --- Phanotom types do not work
+
+type Person<T> = {firstNm: string, lastNm: string}
+
+
+type NotValidated = {type: "notvalidated"}
+type Validated = {type: "validated"}
+
+declare function validate(p: Person<NotValidated>):  Person<Validated> 
+
+declare function doSomethingValidated(p: Person<Validated>): void
+
+function validatedOrNot<T>(p:Person<T>): void{
+    doSomethingValidated(p)
 }
 
-type Flatten<Type> = Type extends Array<infer Item> ? Item: Type;
-
-const head = <T> (t: T[]): Flatten<T[]> => {
-    return t[0]
-}
-
-const generalHead = <T> (t: T): Flatten<T> => {
-    if(Array.isArray(t)) 
-        return t[0]
-    else 
-        // return t //Type 'T' is not assignable to type 'Flatten<T>'
-        return t as any
+function notValidated (p:Person<NotValidated>): void{
+    doSomethingValidated(p)
 }
 
 
@@ -179,3 +164,39 @@ export const __hole = <T>(): T => {
 }
 
 export const __never = (): never => __hole()
+
+
+
+// ---- `never` note
+
+const nevr : never = _()
+
+
+type SameAs<A> = Either<never,A>
+
+const onlyA: SameAs<number> = {type: "right", content:_()}
+const impossible: SameAs<number> = {type: "left", content:_()}
+
+// --- undefined callbacks
+
+declare function someUnknownCallback(t: unknown): void 
+const overbar: <T>(_:T) => void =  someUnknownCallback
+
+declare function someOverbar<T>(t:T): void
+const unknownCallback: (_: unknown) => void = someOverbar
+
+const overbar2: <T>(_:T) => void = t => {}
+const unknownCallback2: (_: unknown) => void = t => {}
+
+overbar(_() === _())
+overbar("" + _())
+
+
+const overbar3: <T>(_:T) => void =  _()
+//export const underbar: <T>() => T = someOverbar //this obviously does not compile
+
+// declare function unk<R>(t: unknown): R 
+// const top = <T,R>(t:T): R => unk(t)
+
+// declare function top2<T,R>(t:T): R
+// const unk2 = <R>(t: unknown): R => top(t)

@@ -1,7 +1,7 @@
 import {_, curry, curry3, officePromise} from './Util'
 
 /*
-General code examples supporting my blog post
+Code examples supporting my blog post
 */
 
 // ---- Introduction 

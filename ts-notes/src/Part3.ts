@@ -1,5 +1,5 @@
 import { Person } from './Part1';
-import {curry, unify, _} from './Util'
+import {curry, unify, verifyExtends, _} from './Util'
 
 // --- switch exhaustive check
 export const contrived = (n: 1 | 2): number => {
@@ -102,6 +102,10 @@ function tst (x: number | Person, y: string | Person) {
     return x === y
 }
 
+verifyExtends<Person, (number | Person) & (string | Person)>()
+verifyExtends<(number | Person) & (string | Person), Person>()
+
+//verifyExtends<(1 | "boo") & ("boo" | Person), "boo">()
 
 1 === (2 as unknown)
 1 == (2 as unknown)
@@ -127,6 +131,7 @@ const helloPlus = {hello: "world!", since:"2022"}
 hello1 === hello2
 hello2 === helloPlus
 
+const hello1num = {hello: 1}
 
 const unknown2 : unknown = 2
 
@@ -183,7 +188,7 @@ eq<(1 | "boo")>(booone, oneboo)
 const hello = {hello: "there"}
 //unify (1, hello)
 
-function verifyExtends<T2 extends T1, T1>() {}
+
 verifyExtends<1, 1 | 2>()
 
 verifyExtends<1, 1 | "boo">()

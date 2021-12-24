@@ -8,6 +8,9 @@ export const _ = <T>(): T => {
 
 export declare function unify<T>(t1: T, t2: T) : T
 
+
+export function verifyExtends<T2 extends T1, T1>() {}
+
 export const curry = <T1, T2, R> (fn: (ax: T1, bx: T2) => R): (a: T1) => (b: T2) => R => {
     const res = (a: T1) => (b: T2) => fn(a, b)
     return res
