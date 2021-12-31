@@ -1,85 +1,101 @@
-import {curry, _} from './Util'
+import {curry, curry3, officePromise, verifyExtends, _} from './Util'
 
 import {Either} from './Part1'
 
+// --- scoping
+
+export const bodyScope = <T>(value: T | undefined | null): void => {
+    if(value) {
+        const t: T = value
+        const t2: T = {} as any
+        const myFn: (_:T) => void = _ => {}
+    }
+  }
 
 
+// type lever unknown guards
 
-// --- Subtyping 
+type IsUnknown<T> = unknown extends T? 1: 0
 
-function verifyExtends<T1, T2 extends T1>() {}
-
-//more specific, fewer variants
-type FooOrBar =  
-| {foo: string} 
-| {bar: string}
-
-//a challenge, implement this function:
-declare function amIFooOrBar(o: FooOrBar): "foo" | "bar"
-
-declare function genFooOrBar(): FooOrBar
-
-//more general, more variants
-type FooOrBarOrBuz =
-| {foo: string} 
-| {bar: string}
-| {baz: string}
-declare function genFooOrBarOrBuz(): FooOrBarOrBuz
-
-const fooOrBarOrBuz: FooOrBarOrBuz = genFooOrBar() //compiles assigns specific to more general 
-//const fooOrBar: FooOrBar = genFooOrBarOrBuz() //will not compile tries to assign general to more specific
-
-verifyExtends<FooOrBarOrBuz, FooOrBar>() //compiles, FooOrBar extends FooOrBarOrBuz
-//verifyExtends<FooOrBar, FooOrBarOrBuz>() //does not compile, FooOrBarOrBuz does not extend FooOrBar
-
-
-type FooAndBar = {foo: string, bar: string} //more general
-declare function genFooAndBar(): FooAndBar
-
-type FooAndBarAndBaz = {foo: string, bar: string, baz: string} //more specific
-declare function genFooAndBarAndBaz(): FooAndBarAndBaz
-
-const fooAndBar: FooAndBar = genFooAndBarAndBaz()  //specific assigned to general is valid assignment
-//const fooAndBarAndBuz: FooAndBarAndBaz = genFooAndBar() // will not compile, tries to assign general to specific
-
-verifyExtends<FooAndBar, FooAndBarAndBaz>() //compiles, FooAndBarAndBaz extends FooAndBar
-//verifyExtends<FooAndBarAndBaz, FooAndBar>() //does not compile, FooAndBar does not extend FooAndBarAndBaz
-
-
-// challenge check:
-// what does your function return for this value?
-const whatIsThat = amIFooOrBar({foo: "foo", bar: "bar"})
-
-
-
-// --- Type Level programming
-
-type HasContent<C> = {content: C}
-
-type GetContent<T> = T extends HasContent <infer C> ? C: T
-
-const getContent = <C, T extends HasContent<C>> (t: T): GetContent<T> => {
-   //return t.content //compiler error:  Type 'C' is not assignable to type 'GetContent<T>'
-   return t.content as any
+export function isUnknown<T>(t: T): IsUnknown<T> {
+   return 1 as any //incorrect runtime value, but we do not care
 }
 
-type Flatten<Type> = Type extends Array<infer Item> ? Item: Type;
+const unk: unknown = {}
+const test: IsUnknown<typeof unk> = {} as any
+const test2: 1 = isUnknown(unk)
 
-const head = <T> (t: T[]): Flatten<T[]> => {
-    return t[0]
+
+export function verifyUnknown<T>(p: IsUnknown<T>, t: T): T {
+    return t
 }
 
-const generalHead = <T> (t: T): Flatten<T> => {
-    if(Array.isArray(t)) 
-        return t[0]
-    else 
-        // return t //Type 'T' is not assignable to type 'Flatten<T>'
-        return t as any
+verifyUnknown(1, unk)
+//does not compile
+//verifyUnknown(0, unk)
+
+const whyWhyWhy = async (item: Office.MessageRead): Promise<void> => {
+    
+    const body =  verifyUnknown(0, await officePromise (curry(item.body.getAsync)(Office.CoercionType.Html)))
+
+    const crazyConfig : (_: Office.AsyncResult<string>) => void = x => ""
+    
+    const body4 = verifyUnknown(1, await officePromise (curry3(item.body.getAsync)(Office.CoercionType.Html)(crazyConfig))) 
+}  
+
+export const verifyUnknownCallback: <T, R>(p: IsUnknown<T>, fn: (_: T) => R) => (_: T) => R 
+    = (p, fn) => {
+   return fn
 }
+
+verifyUnknownCallback(1, curry(curry)({} as any))
 
 
 // --- higher rank
 
+declare function fn1<T> (f:(t:T)=> void): void 
+declare function fn2(f: <T>(t:T)=> void): void 
+
+const useStr = (s:string): void => {}
+const useNum = (n:number): void => {}
+const getCallback = <T>(t:T): void => {}
+
+
+fn1(useStr)
+//fn2(useStr)
+fn2(getCallback)
+
+declare function fn3<P,T> (f:()=> T): void 
+declare function fn4(f: <T>() => T): void
+
+const strThunk = () => "boo"
+const numThunk = () => 1
+declare function typeHole<T>():T 
+
+
+fn3(strThunk)
+//fn4(strThunk, numThank)
+fn4(typeHole)
+
+//Factory pattern replacement
+interface Foo {
+    foo: string
+}
+class MyFoo implements Foo{
+    foo: string
+    constructor() {
+        this.foo = "bar"
+    }
+}
+
+function existencialFactory(t: <T extends Foo>(t:T) => void): void {
+    t(new MyFoo())
+}
+function nonExistencialFactory<T extends Foo> (t:(t:T) => void): void {
+    //t(new MyFoo()) //does not compile
+}
+
+//Alternative apporach to create existential types:
 interface HoleInterface {
     <T>(): T;
   }
@@ -103,6 +119,8 @@ expectsPolymorphicHole(_)
 expectsPolymorphicHole(_2)
 //expectsPolymorphicHole(nonPolymorphic) //will not compile
 
+
+
 // attempt of using higher rank to protect data 
 // Imaginary world without debuggers, JSON.stringify, etc
 type Api = {getGoodies: string[]}
@@ -122,9 +140,10 @@ const goodProgram = <Password>(p: Password): string[] => {
 
 const stealPassword = <Password>(p: Password): Password => p
 
-const valid = secretive(goodProgram) //valid: string[]
-const invalid = secretive(stealPassword) //invalid: unknown, unfortunately compiles retrieving password as unknown
+const valid = verifyUnknown(0, secretive(goodProgram)) //valid: string[]
+const invalid_ = secretive(stealPassword) //invalid: unknown, unfortunately compiles retrieving password as unknown
 
+//const invalid = verifyUnknown(0,secretive(stealPassword)) //does not compile!
 
 // interface attempt also allows type escape
 interface ExistentialCallback<R> {
@@ -144,7 +163,8 @@ secretive2(stealPassword2)
 
  
 
-// --- Straighforward Phanotom types do not work
+// --- Phantom types
+
 // People use classes / interfaces to accomplish similar things
 // see also https://github.com/microsoft/TypeScript/issues/21625
 
@@ -169,6 +189,8 @@ function notValidated0 (p:Person0<NotValidated>): void{
     doSomethingValidated0(p)
 }
 
+
+
 // Phantom apptempt that works:
 
 type Person1<T> = {firstNm: string, lastNm: string, t?: T}  //adding value level representation t: T as a filed would fix this
@@ -190,6 +212,11 @@ declare function doSomethingValidated1(p: Person1<Validated>): void
 // function notValidated1 (p:Person1<NotValidated>): void{
 //     doSomethingValidated1(p)
 // }
+
+// Does not compile!
+// verifyExtends<Person1<number>, Person1<1>>()
+
+
 
 
 
@@ -243,3 +270,25 @@ const overbar3: <T>(_:T) => void =  _()
 
 // declare function top2<T,R>(t:T): R
 // const unk2 = <R>(t: unknown): R => top(t)
+
+
+
+//Extras
+//classes are structually typed too
+class Bye {
+    constructor() {
+        this.bye = "1"
+    }
+    bye: string
+}
+
+class Bye2 {
+    constructor() {
+        this.bye = "2"
+    }
+    bye: string 
+}
+
+declare function useBye(b: Bye): void 
+
+useBye(new Bye2())

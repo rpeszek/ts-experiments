@@ -37,7 +37,7 @@ const curriedAdd3 = curry3(add3tst) //curriedAdd3: (a: number) => (b: string) =>
 const tst3 =  curry3(add3tst)(1) //const tst3: (b: string) => (c: string | number) => string
 const tst3one = curry3(add3tst)(1)("one") //const tst3one: (c: string | number) => string
 
-export const officePromise = <T> (getasync: ((fx: ((r: Office.AsyncResult<T>) => void)) => void)): Promise<T> => {
+export const officePromise = <T> (getasync: (fx: (r: Office.AsyncResult<T>) => void) => void): Promise<T> => {
     return new Promise((resolve, reject) => {
       getasync((res: Office.AsyncResult<T>) => {
         if(res.status===Office.AsyncResultStatus.Succeeded){
@@ -47,3 +47,5 @@ export const officePromise = <T> (getasync: ((fx: ((r: Office.AsyncResult<T>) =>
       })
    })
   }
+
+
