@@ -59,6 +59,7 @@ export const contrived_better2 = (n: 1 | 2): number => {
 function testEqSemantics(a: {bye: string}, b: {hello: string}): boolean {
    //This condition will always return 'false' since the types '{ bye: string; }' and '{ hello: string; }' have no overlap.
    //return a === b
+   //return a == b
    return true
 }
 
@@ -229,7 +230,7 @@ type Payload1<T> = {payload: T}  //could replace Payload in the examples below
 declare function eqPayloads<T>(t1: Payload<T>, t2: Payload<T>): boolean
 
 
-// Compiliation error:
+// Compilation error:
 // Property 'bye' is missing in type '{ hello: string; }' but required in type '{ bye: string; }'.ts(2741)
 // Part3.ts(214, 14): 'bye' is declared here.
 // Part3.ts(210, 20): The expected type comes from property 'payload' which is declared here on type 'Payload<{ bye: string; }>'
