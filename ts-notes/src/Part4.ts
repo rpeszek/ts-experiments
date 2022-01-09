@@ -166,6 +166,13 @@ const invalid_ = secretive(stealPassword) //invalid: unknown, unfortunately comp
 //const invalid = verifyUnknown(false,secretive(stealPassword)) //does not compile!
 
 
+const verySecretive = <R> (_: IsUnknown<R>, fn: <Password> (p: Password) => R): R  => {
+    const s : any = "topsecret"
+    return fn (s)
+ }
+
+const valid_ = verySecretive(false, goodProgram) //valid: string[]
+const invalid__ = verySecretive(true, stealPassword) 
 
 // interface based approach
 interface ExistentialCallback<R> {
@@ -185,9 +192,25 @@ secretive2(stealPassword2)
 
 //-- preventing subtyping
 
+// -- frigle type safety example relies on incosistent semantics around Object literals
+
+function exact<T>(item:T): T {
+    return item;
+}
+
+//this will not compile
+//exact<{hello: string}>({hello: "", since:2002})
+
+const helloSince = {hello: "", since:2002}
+
+exact<{hello: string}>(helloSince)
+
+// -- more robust 
+
 type Same<P,T> = P extends T? (T extends P? true: false): false
 
 type Hello = {hello: string}
+type HelloSince = {hello: string, since: number}
 
 const proofHello = <T> (t: T): Same<Hello,T> => {
     return {} as any //does not matter
@@ -203,24 +226,46 @@ const verifyHello = <T> (_: Same<Hello,T>, t:T): T => t
 
 verifyHello(true, {hello: "world"})
 verifyHello(false, {hello: "world", since : 2020})
+verifyHello(false, helloSince)
 
 const verifySame = <P> () => <T> (_: Same<P,T>, t:T): T => t
 
 verifySame<Hello>()(true, {hello: "world"})
 verifySame<Hello>()(false, {hello: "world", since : 2020})
 //verifySame<Hello>()(true, {hello: "world", since : 2020})
+verifySame<Hello>()(false, helloSince)
+
+
+// -- safePush example
 
 //Note to get safety I end up with casting
 const safePush = <P, T> (_: Same<P,T>, ps: P[], t: T): number => ps.push(t as any)
 
-
 const intlist: number[] = [1,2,3]
-const list: unknown[] = intlist
-list.push("not a number") //unsafe TS push
+const unklist: unknown[] = intlist
+unklist.push("not a number") //unsafe TS push
 
 safePush(true, intlist, 1)  //this is safe
-safePush(false, list, 1)    //this is risky and will not compile with true
-safePush(false, list, "not a number") //this is risky (here wrong) and will not compile with true
+safePush(false, unklist, 1)    //this is risky and will not compile with true
+safePush(false, unklist, "not a number") //this is risky (here wrong) and will not compile with true
+
+const str: unknown = "not a number"
+safePush(true, unklist, str)
+
+// -- with unknown
+
+type SameAndKnown<P,T> = P extends T? (T extends P? (unknown extends T? false: true): false): false
+const verySafePush = <P, T> (_: SameAndKnown<P,T>, ps: P[], t: T): number => ps.push(t as any)
+
+verySafePush(true, intlist, 1)  //this is safe
+verySafePush(false, unklist, 1)    //this is risky and will not compile with true
+verySafePush(false, unklist, "not a number") //this is risky (here wrong) and will not compile with true
+
+const unkstr: unknown = "not a number"
+verySafePush(false, unklist, unkstr)
+
+
+// -- rank-2 safePush example
 
 //This is easier on TS to type check than a tuple
 type Pair<A,B> = {fst: A, snd: B}
@@ -241,6 +286,19 @@ const safePush2 = <P> (ps: P[], fn: <T> () => Pair<Same<P,T>, T>): number => {
 
 
 
+// -- safeEq example
+
+const safeEq = <P, T> (_: Same<P,T>, a: P, b: T): boolean => a === (b as unknown)
+
+safeEq(false, 1, "str")
+safeEq(true, {hello: "word"}, {hello:"dolly"})
+// safeEq(true, {hello: "word"}, {hello:"word", since:2022}))
+// safeEq(true, 1, "str")
+
+
+
+  
+
 // --- Phantom types
 
 // People use classes / interfaces to accomplish similar things
@@ -248,9 +306,6 @@ const safePush2 = <P> (ps: P[], fn: <T> () => Pair<Same<P,T>, T>): number => {
 
 type Person<T> = {firstNm: string, lastNm: string}  //adding value level representation `phantom?: T` 
 
-const createPerson : <T>(fst: string, lst: string) => Person<T> = (fst, lst) => {
-    return {firstNm: fst, lastNm: lst}
-} 
 
 type Validated = {type: "validated"}
 type ValidationError = string
@@ -279,7 +334,7 @@ function validated(p:Person<Validated>): void {
 
 type Person1<T> = {firstNm: string, lastNm: string, t?: T}  //adding value level representation t: T as a filed would fix this
 
-const testP1 : <T>(fst: string, lst: string) => Person1<T> = (fst, lst) => {
+const createPerson : <T>(fst: string, lst: string) => Person1<T> = (fst, lst) => {
     return {firstNm: fst, lastNm: lst}
 } 
 
@@ -301,6 +356,7 @@ declare function doSomethingValidated1(p: Person1<Validated>): void
 // verifyExtends<Person1<number>, Person1<1>>()
 
 
+// -- sorted list example
 interface Comparator<T> {
     compare (o1: T, o2: T): number
 }
