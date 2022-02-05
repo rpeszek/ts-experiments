@@ -2,7 +2,36 @@ import {curry, curry3, officePromise, verifyExtends, _} from './Util'
 
 import {Either} from './Part1'
 
-  
+// --- See List.ts for Recursive List example  
+
+// --- See RecSchemes.ts for Recursion Scheme example
+
+
+// --- Type Level programming
+
+type HasContent<C> = {content: C}
+
+type GetContent<T> = T extends HasContent <infer C> ? C: T
+
+const getContent = <C, T extends HasContent<C>> (t: T): GetContent<T> => {
+   //return t.content //compiler error:  Type 'C' is not assignable to type 'GetContent<T>'
+   return t.content as any
+}
+
+type Flatten<Type> = Type extends Array<infer Item> ? Item: Type;
+
+const head = <T> (t: T[]): Flatten<T[]> => {
+    return t[0]
+}
+
+const generalHead = <T> (t: T): Flatten<T> => {
+    if(Array.isArray(t)) 
+        return t[0]
+    else 
+        // return t //Type 'T' is not assignable to type 'Flatten<T>'
+        return t as any
+}
+
 
 // --- Subtyping 
 
@@ -41,7 +70,7 @@ const fooAndBar: FooAndBar = genFooAndBarAndBaz()  //specific assigned to genera
 //const fooAndBarAndBuz: FooAndBarAndBaz = genFooAndBar() // will not compile, tries to assign general to specific
 
 verifyExtends<FooAndBarAndBaz, FooAndBar>() //compiles, FooAndBarAndBaz extends FooAndBar
-//verifyExtends<FooAndBarAndBaz, FooAndBar>() //does not compile, FooAndBar does not extend FooAndBarAndBaz
+//verifyExtends<FooAndBar, FooAndBarAndBaz>() //does not compile, FooAndBar does not extend FooAndBarAndBaz
 
 
 // challenge check:
@@ -55,35 +84,7 @@ verifyExtends<never, unknown>()
 
 
 
-// --- Type Level programming
-
-type HasContent<C> = {content: C}
-
-type GetContent<T> = T extends HasContent <infer C> ? C: T
-
-const getContent = <C, T extends HasContent<C>> (t: T): GetContent<T> => {
-   //return t.content //compiler error:  Type 'C' is not assignable to type 'GetContent<T>'
-   return t.content as any
-}
-
-type Flatten<Type> = Type extends Array<infer Item> ? Item: Type;
-
-const head = <T> (t: T[]): Flatten<T[]> => {
-    return t[0]
-}
-
-const generalHead = <T> (t: T): Flatten<T> => {
-    if(Array.isArray(t)) 
-        return t[0]
-    else 
-        // return t //Type 'T' is not assignable to type 'Flatten<T>'
-        return t as any
-}
-
-
-
-
-//-- never vs type hole
+//-- Thunks, callbacks, never, unknown
 
 export const _never = (): never => {
     throw new Error("hole"); 
@@ -100,18 +101,6 @@ export const __never = (): never => __hole()
 
 
 
-// ---- `never` note
-
-const nevr : never = _()
-
-
-type SameAs<A> = Either<never,A>
-
-const onlyA: SameAs<number> = {type: "right", content:_()}
-const impossible: SameAs<number> = {type: "left", content:_()}
-
-// --- undefined callbacks
-
 declare function someUnknownCallback(t: unknown): void 
 const overbar: <T>(_:T) => void =  someUnknownCallback
 
@@ -121,22 +110,31 @@ const unknownCallback: (_: unknown) => void = someOverbar
 const overbar2: <T>(_:T) => void = t => {}
 const unknownCallback2: (_: unknown) => void = t => {}
 
+// -- using overbar as a typehole to check types of expressions, hover over 'overbar'
+
 overbar(_() === _())
 overbar("" + _())
 
+// --- Yoneda lemma
 
-const overbar3: <T>(_:T) => void =  _()
-//export const underbar: <T>() => T = someOverbar //this obviously does not compile
+type Yoneda<T> = () => <R>(f: (_: T) => R) => R
+type Thunk<T> = () => T
 
-// declare function unk<R>(t: unknown): R 
-// const top = <T,R>(t:T): R => unk(t)
+const toYoneda = <T> (th: Thunk<T>): Yoneda<T> => {
+   const res = () => <R> (f: (_: T) => R): R => f(th())
+   return res
+}
 
-// declare function top2<T,R>(t:T): R
-// const unk2 = <R>(t: unknown): R => top(t)
+const fromYoneda = <T> (y: Yoneda<T>): Thunk<T> => {
+    const res = (): T => y()(x => x)
+    return res
+ }
+
+declare function yoneda1 <T, R> (f: (_: T) => R): R
+declare function yoneda2 <T> (): (<R>(f: (_: T) => R) => R)
 
 
-
-//Extras
+//Side note (not in the post)
 //classes are structually typed too
 class Bye {
     constructor() {
