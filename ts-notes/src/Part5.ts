@@ -97,8 +97,9 @@ export const __hole = <T>(): T => {
     throw new Error("hole"); 
 }
 
-export const __never = (): never => __hole()
+export const __neverFn1 = (): never => __hole()
 
+export const __neverFn2: () => never =  __hole
 
 
 declare function someUnknownCallback(t: unknown): void 
@@ -107,8 +108,6 @@ const overbar: <T>(_:T) => void =  someUnknownCallback
 declare function someOverbar<T>(t:T): void
 const unknownCallback: (_: unknown) => void = someOverbar
 
-const overbar2: <T>(_:T) => void = t => {}
-const unknownCallback2: (_: unknown) => void = t => {}
 
 // -- using overbar as a typehole to check types of expressions, hover over 'overbar'
 
