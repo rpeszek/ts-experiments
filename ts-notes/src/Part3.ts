@@ -247,7 +247,7 @@ declare function eqPayloads<T>(t1: Payload<T>, t2: Payload<T>): boolean
 eqPayloads({payload: {bye: "world"}}, {payload: {hello: "world"}})
 
 
-// Payload can be used in contravariant ways, TS cannot assume 
+// Payload can be used in contravariant ways, TS should not assume it is not
 interface Fun<T,R> extends Payload<T> {
     apply(): R 
 }
