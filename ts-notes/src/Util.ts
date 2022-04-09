@@ -18,19 +18,18 @@ export const curry = <T1, T2, R> (fn: (ax: T1, bx: T2) => R): (a: T1) => (b: T2)
 
 const addtst = (a:number, b: number):number => a + b
 const curriedAdd = curry(addtst) //const curriedAdd: (a: number) => (b: number) => numbers
-const tst = curry(addtst)(1) //const tst: (b: number) => number
-const tstb = curry(addtst)(1)(2) //tst2:number = 3
+const tst1 = curry(addtst)(1) //const tst1: (b: number) => number
+const tst12 = curry(addtst)(1)(2) //tst12:number = 3
 //const willnotcompile = curry(_())
 
-const addtst2 = (a:number | string, b: string):string => a + b
-const tst1 = curry(addtst2)(1) //const tst: (b: number) => number
-const tst21one =  curry(addtst2)(1)("one") //tst2b: string = "1one"
+const addtstB = (a:number | string, b: string):string => a + b
+const tstB1 = curry(addtstB)(1) //const tstB1: (b: number) => number
+const tstB1one =  curry(addtstB)(1)("one") //tstB1one: string = "1one"
 
 export const curry3 = <T1, T2, T3, R> (fn: (ax: T1, bx: T2, cx: T3) => R): (a: T1) => (b: T2) => (c: T3) =>  R => {
     const res = (a: T1) => (b: T2) => (c: T3) => fn(a, b, c)
     return res
  }
-
 
 const add3tst = (a:number, b: string, c: number | string) :string => a + b + c
 const curriedAdd3 = curry3(add3tst) //curriedAdd3: (a: number) => (b: string) => (c: string | number) => string

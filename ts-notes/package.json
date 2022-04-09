@@ -14,7 +14,7 @@
     "@types/office-js": "^1.0.221",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7",
-    "typescript": "^4.5.2"
+    "typescript": "^4.6.3"
   },
   "dependencies": {
     "immutable": "^4.0.0"

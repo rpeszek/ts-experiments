@@ -26,13 +26,10 @@ export type Either<A,B> =
 | {type: "left", content: A}
 | {type: "right", content: B}
 
-let x: Either<number, string> = {type: "left", content: 1}
+let x1: Either<number, string> = {type: "left", content: 1}
 //let wrong: Either<number, string> = {type: "left", content: "one"} // will not compile
 
-const x1: Either<number, string> = {type: "left", content: _()}
-
-const y: Either<number, string> = {"type": "left", "content": 1}
-//let wrong: Either<number, string> = {"type": "left", "content": "one"} // will not compile
+const x: Either<number, string> = {type: "left", content: _()}
 
 type JsonVal = 
 | {type: "object", val: Map<string, JsonVal>}
@@ -44,7 +41,7 @@ type JsonVal =
 
 
 const tstj: JsonVal = {type:"array", val:[{type: "null"}, {type: "number", val: 5}]} //compiles
-//const wrong: JsonVal = {type: "number", val: {type: "string", val: "5"}} //does not compile, number cannot a nested string
+//const wrong: JsonVal = {type: "number", val: {type: "string", val: "5"}} //does not compile, number is not JSON value
 //const wrong2: {type: "object",  val:[{type: "null"}, {type: "number", val: 5}]} //does not compile, object is not an array
 
 
@@ -57,14 +54,13 @@ export const example1 = async (item: Office.MessageRead): Promise<string> => {
     const partiallyAppliedBodyFn = (fn: ((res: Office.AsyncResult<string>) => void)) => 
         item.body.getAsync(bodyType, fn) 
     
-    //more readable version:
+    //a more readable version:
     const partiallyAppliedBodyFn2 = (fn: OfficeCallack<string>) => item.body.getAsync(Office.CoercionType.Html, fn)
     const partiallyAppliedBodyFn3: (_: OfficeCallack<string>) => void = 
        fn => item.body.getAsync(Office.CoercionType.Html, fn)
     const body = await officePromise<string> (partiallyAppliedBodyFn) // body: string
     return body
 }
-
 
 // Bumps on path
 
@@ -127,6 +123,9 @@ const str = "Hello " + _()
 const testaa = curry(_()) //compilation error 
 const test = curry({} as any)
 
+type CorrectType = (ax: never, bx: never) => unknown
+const compiles = curry(_<CorrectType>())
+
 
 // --- Type Checking Bloopers
 
@@ -142,11 +141,22 @@ const bloopers = async (item: Office.MessageRead): Promise<void> => {
             => void
         = curry (curry (item.body.getAsync)) 
 
+    //computed type:
+    //const nonsense1a: (a: string | Office.CoercionType) => (b: unknown) => (b: ((asyncResult: Office.AsyncResult<string>) => void) | undefined) => void
+    const nonsense1a = curry (curry (item.body.getAsync))    
+
     //compiles but it should not
+
+    //computed type
+    //const nonsense2: <T1, T2, R>(a: (ax: T1, bx: T2) => R) => (b: unknown) => (a: T1) => (b: T2) => R
     const nonsense2 = curry(curry) 
 
+    //computed type
+    //const nonsense3: <T1, T2, T3, R>(a: (ax: T1, bx: T2, cx: T3) => R) => (b: unknown) => (a: T1) => (b: T2) => (c: T3) => R
     const nonsense3 = curry(curry3)
 
+    //computed type
+    //const nonsense4: <T1, T2, R>(a: (ax: T1, bx: T2) => R) => (b: unknown) => (b: unknown) => (a: T1) => (b: T2) => R
     const nonsense4 = curry(curry(curry))
 }
 
