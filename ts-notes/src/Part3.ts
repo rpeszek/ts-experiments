@@ -213,6 +213,13 @@ verifyExtends<1, 1 | 2>()
 verifyExtends<1, 1 | "boo">()
 verifyExtends<"boo", 1 | "boo">()
 
+// subtyping on functions (explaining Part1 bloopers)
+verifyExtends<() => number, (_:string) => number>()
+verifyExtends<(_:string) => number, (_1:string,_2:boolean) => number>()>
+
+//this one fails
+//verifyExtends<(_:string) => number, (_2:boolean,_1:string) => number>()>
+
 //Type '(1 | "boo") & ("boo" | Person)' does not satisfy the constraint '"boo"'.
 //  Type '1 & Person' is not assignable to type '"boo"'.ts(2344)
 //verifyExtends<(1 | "boo") & ("boo" | Person), "boo">()
