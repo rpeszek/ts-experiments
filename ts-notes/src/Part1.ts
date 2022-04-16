@@ -163,3 +163,10 @@ const bloopers = async (item: Office.MessageRead): Promise<void> => {
 const nonsense2 = curry(curry)
 
 type WhatTheHeck = typeof nonsense2
+
+//--- Explanation for the above bloopers: TS allows to assign functions with fewer
+//params to functions with more params
+declare function testfn(fn: (_:string) => number):number
+
+//compiled type is number
+const num = testfn(() => 1)

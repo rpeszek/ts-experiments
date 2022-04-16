@@ -75,8 +75,8 @@ verifyExtends<{bye: string} & {hello: string}, typeof helloBye>()
 
 // --- === semantics, what’s an overlap?
 
-const helloDolly: {hello: string} = {hello: "Dolly!"}
-const datedHello: {hello: string, since: number} = {hello: "world!", since:2022}
+const helloDolly: {hello: string} = {hello: "Dolly!"} 
+const datedHello: {hello: string, since: number} = {hello: "world!", since:2022} 
 const one = 1 //const one: 1
 const two = 2 //const two: 2
 const onenum: number  = 1
@@ -94,6 +94,12 @@ const world: string = "world"
 onenum === twonum
 //compiles, note 'typeof datedHello' extends 'typeof helloDolly' 
 helloDolly === datedHello
+
+const helloDolly1 = {hello: "Dolly!"} as const 
+const datedHello1 = {hello: "world!", since:2022} as const 
+
+// no longer compiles
+//helloDolly1 === datedHello1
 
 verifyExtends<typeof datedHello, typeof helloDolly>()
 
@@ -214,8 +220,8 @@ verifyExtends<"boo", 1 | "boo">()
 // --- Variance Problems
 
 
-const bye = {bye: "world"}
-const hello = {hello: "world"}
+const bye = {bye: "world"} 
+const hello = {hello: "world"} 
 
 declare function eqArrays<T>(t1: T[], t2: T[]): boolean
 
